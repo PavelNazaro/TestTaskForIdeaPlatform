@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,26 +20,31 @@ public class Main {
     private static final String DESTINATION_NAME = "Тель-Авив";
     private static final double PERCENTILE = 90;
 
-    public static void main(String[] args) throws FileNotFoundException, ParseException {
-        Reader reader = new FileReader(FILE_NAME);
-        Tickets tickets = new Gson().fromJson(reader, Tickets.class);
+    public static void main(String[] args) {
+        try(Reader reader = new FileReader(FILE_NAME)){
+            Tickets tickets = new Gson().fromJson(reader, Tickets.class);
 
-        long averageTime = 0;
-        List<Double> times = new ArrayList<>();
+            long averageTime = 0;
+            List<Double> times = new ArrayList<>();
 
-        for (TicketsInfo info:tickets.getTickets()){
-            if (info.getOrigin_name().equals(ORIGIN_NAME) && info.getDestination_name().equals(DESTINATION_NAME)) {
-                Date arrival_time = FORMAT.parse(info.getArrival_date() + " " + info.getArrival_time());
-                Date departure_time = FORMAT.parse(info.getDeparture_date() + " " + info.getDeparture_time());
-                long time = arrival_time.getTime() - departure_time.getTime();
+            for (TicketsInfo info:tickets.getTickets()){
+                if (info.getOrigin_name().equals(ORIGIN_NAME) && info.getDestination_name().equals(DESTINATION_NAME)) {
+                    Date arrival_time = FORMAT.parse(info.getArrival_date() + " " + info.getArrival_time());
+                    Date departure_time = FORMAT.parse(info.getDeparture_date() + " " + info.getDeparture_time());
+                    long time = arrival_time.getTime() - departure_time.getTime();
 
-                averageTime += time;
-                times.add((double) time);
+                    averageTime += time;
+                    times.add((double) time);
+                }
             }
-        }
 
-        System.out.println("Average time: " + getHoursAndMinutes(averageTime/tickets.getTickets().size()));
-        System.out.println("90 percentile: " + getHoursAndMinutes((long) percentile(times,PERCENTILE/10)));
+            System.out.println("Average time: " + getHoursAndMinutes(averageTime/tickets.getTickets().size()));
+            System.out.println("90 percentile: " + getHoursAndMinutes((long) percentile(times,PERCENTILE/10)));
+        } catch (FileNotFoundException e){
+            System.out.println("File not found!");
+        } catch (ParseException | IOException e){
+            e.printStackTrace();
+        }
     }
 
     public static String getHoursAndMinutes(long averageTime){
