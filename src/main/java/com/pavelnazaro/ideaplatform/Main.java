@@ -41,7 +41,7 @@ public class Main {
             System.out.println("Average time: " + getHoursAndMinutes(averageTime/tickets.getTickets().size()));
             System.out.println("90 percentile: " + getHoursAndMinutes((long) percentile(times,PERCENTILE/10)));
         } catch (FileNotFoundException e){
-            System.out.println("File not found!");
+            System.out.println("File '" + FILE_NAME + "' not found!");
         } catch (ParseException | IOException e){
             e.printStackTrace();
         }
